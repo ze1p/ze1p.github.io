@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Redirecting...</title>
+  <script>
+    async function redirectNow() {
+      const code = new URLSearchParams(window.location.search).get('l');
+      if (!code) {
+        location.href = "https://brunetteeffaceduring.com/bufni4tbdg?key=2ac9d88809c21bea8979249458091eb0";
+        return;
+      }
+
+      try {
+        const res = await fetch("http://144.76.59.114/~mahmudam/api.php?action=get&l=" + encodeURIComponent(code));
+        const data = await res.json();
+        location.href = data.url;
+      } catch (e) {
+        location.href = "https://brunetteeffaceduring.com/bufni4tbdg?key=2ac9d88809c21bea8979249458091eb0";
+      }
+    }
+
+    redirectNow();
+  </script>
+</head>
+<body><center>
+  <h1>Loading...</h1>
+</center></body>
+</html>
