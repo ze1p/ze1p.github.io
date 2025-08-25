@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>শেয়ার করলেই আনলক — চেইন রিঅ্যাকশন ল্যান্ডিং</title>
+  <meta name="description" content="আপনার শেয়ার লিংক থেকে ৩ জন ভিজিট করলে ফ্রি রিসোর্স আনলক হবে। একদম স্ট্যাটিক HTML, তবুও ভাইরাল লুপ!" />
+  <!-- Open Graph for better previews -->
+  <meta property="og:title" content="শেয়ার করলেই আনলক — চেইন রিঅ্যাকশন" />
+  <meta property="og:description" content="আপনার শেয়ার লিংক থেকে ৩ জন ভিজিট করলেই রিওয়ার্ড আনলক।" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://dummyimage.com/1200x630/000/fff.png&text=Share+to+Unlock" />
+  <meta name="twitter:card" content="summary_large_image"/>
+  <style>
+    :root{
+      --bg:#0f172a;/*slate-900*/
+      --panel:#111827;/*gray-900*/
+      --panel2:#0b1220;/*deep*/
+      --text:#e5e7eb;/*gray-200*/
+      --muted:#9ca3af;/*gray-400*/
+      --brand:#06b6d4;/*cyan-500*/
+      --accent:#22c55e;/*green-500*/
+      --warn:#f59e0b;/*amber-500*/
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; background:radial-gradient(1200px 600px at 80% -20%,#0ea5e960,transparent),radial-gradient(1200px 600px at -20% 120%,#22c55e40,transparent),var(--bg); color:var(--text)}
+    .wrap{max-width:960px;margin:0 auto;padding:24px}
+    .card{background:linear-gradient(180deg,var(--panel),var(--panel2)); border:1px solid #1f2937; border-radius:20px; padding:24px; box-shadow:0 10px 30px #0006}
+    .hero{display:grid; gap:18px; grid-template-columns:1.2fr 1fr; align-items:center}
+    @media (max-width:900px){.hero{grid-template-columns:1fr}}
+    h1{font-size:clamp(26px,4vw,44px); line-height:1.1; margin:0}
+    p{color:var(--muted); margin:6px 0 0}
+    .badge{display:inline-flex;align-items:center;gap:8px; background:#083344; color:#a5f3fc; border:1px solid #0e7490; padding:6px 10px; border-radius:999px; font-size:13px}
+    .cta{display:flex; gap:10px; flex-wrap:wrap; margin-top:16px}
+    button,.btn{cursor:pointer; border:0; border-radius:12px; padding:12px 16px; font-weight:600}
+    .btn-primary{background:var(--brand); color:#001018}
+    .btn-outline{background:transparent; color:var(--text); border:1px solid #334155}
+    .grid{display:grid; gap:16px}
+    .grid-3{grid-template-columns:repeat(3,1fr)}
+    @media (max-width:900px){.grid-3{grid-template-columns:1fr}}
+    .kpi{background:#0b1220; border:1px solid #1f2937; border-radius:16px; padding:16px}
+    .kpi strong{font-size:28px}
+    .progress{height:10px;background:#0b1220;border:1px solid #1f2937;border-radius:999px; overflow:hidden}
+    .bar{height:100%;background:linear-gradient(90deg,var(--brand),var(--accent)); width:0%}
+    .hidden{display:none}
+    .foot{opacity:.7; font-size:13px; margin-top:16px}
+    .sharebox{display:flex; gap:10px; flex-wrap:wrap}
+    .input{width:100%; padding:12px 14px; background:#0b1220; color:var(--text); border:1px dashed #334155; border-radius:12px}
+    .pill{font-size:12px; padding:6px 10px; border:1px solid #334155; border-radius:999px; color:#a1a1aa}
+    .unlock{background:linear-gradient(180deg,#052e1c,#031b11); border:1px solid #064e3b}
+    .reward{display:grid; grid-template-columns:1fr; gap:12px}
+    a {color:#7dd3fc}
+    .tick{filter:drop-shadow(0 0 8px #22c55e)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card hero">
+      <div>
+        <span class="badge">🚀 চেইন রিঅ্যাকশন ল্যান্ডিং</span>
+        <h1>শেয়ার করুন, <span style="color:var(--accent)">৩ জন</span> ভিজিট করলেই রিওয়ার্ড আনলক!</h1>
+        <p>একটি <strong>স্ট্যাটিক HTML</strong> পেজেই ভাইরাল লুপ সম্ভব — আপনার ইউনিক লিংক শেয়ার করুন; ৩ জন ভিজিট করলে ফ্রি রিসোর্স, কুপন বা ডাউনলোড আনলক হবে।</p>
+        <div class="cta">
+          <button id="btnShare" class="btn btn-primary">📣 লিংক শেয়ার করুন</button>
+          <button id="btnCopy" class="btn btn-outline">🔗 কপি লিংক</button>
+        </div>
+        <div class="foot">Tip: WhatsApp/Telegram/X/Facebook এ শেয়ার করলে দ্রুত চেইন রিঅ্যাকশন শুরু হয়।</div>
+      </div>
+      <div>
+        <div class="kpi">
+          <div style="display:flex; gap:10px; align-items:center; justify-content:space-between">
+            <div>
+              <div class="pill">আপনার রেফারেল প্রোগ্রেস</div>
+              <div style="margin-top:8px"><strong id="refCount">0</strong> / <span id="target">3</span> ভিজিট</div>
+            </div>
+            <svg class="tick" id="tick" width="56" height="56" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" stroke="#064e3b" stroke-width="2" fill="#052e1c"/>
+              <path d="M7 12.5l3 3 7-7" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="progress" style="margin-top:10px"><div class="bar" id="bar"></div></div>
+          <div class="sharebox" style="margin-top:12px">
+            <input id="shareUrl" class="input" readonly>
+            <a id="wa" class="btn btn-outline" target="_blank" rel="noopener">WhatsApp</a>
+            <a id="tg" class="btn btn-outline" target="_blank" rel="noopener">Telegram</a>
+            <a id="x" class="btn btn-outline" target="_blank" rel="noopener">X</a>
+            <a id="fb" class="btn btn-outline" target="_blank" rel="noopener">Facebook</a>
+          </div>
+        </div>
+        <div class="kpi unlock" id="unlockBox" style="margin-top:12px">
+          <div class="pill" style="border-color:#065f46;color:#a7f3d0">🎁 রিওয়ার্ড</div>
+          <div class="reward">
+            <div id="lockedMsg">৩ জন আসলেই এখানে <strong>ডাউনলোড/কুপন কোড</strong> দেখা যাবে।</div>
+            <div id="rewardBox" class="hidden">
+              <div><strong>অভিনন্দন!</strong> আপনার রিওয়ার্ড আনলক হয়েছে।</div>
+              <div>
+                <a id="downloadLink" class="btn btn-primary" href="#" download>⬇️ ফ্রি রিসোর্স ডাউনলোড</a>
+                <div class="foot">এই লিংকটি ডেমো। নিজের ফাইল/কুপন দিন।</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-3" style="margin-top:18px">
+      <div class="kpi">
+        <div class="pill">কিভাবে কাজ করে</div>
+        <p>১) পেজটি আপনার জন্য একটি ইউনিক <em>ref</em> আইডি বানায়। ২) আপনার লিংক শেয়ার করুন। ৩) যারা লিংকে ঢুকবে, আমরা কাউন্টার বাড়াই (CountAPI/ফলব্যাক)। ৪) ৩ হলেই রিওয়ার্ড আনলক।</p>
+      </div>
+      <div class="kpi">
+        <div class="pill">১০০% স্ট্যাটিক</div>
+        <p>এখানে কোন সার্ভার দরকার নেই। চাইলে <code>countapi.xyz</code> দিয়ে শেয়ার-ভিজিট কাউন্ট করা হয়। অফলাইনে হলে লোকাল ফ্যালব্যাক।</p>
+      </div>
+      <div class="kpi">
+        <div class="pill">এসইও + প্রিভিউ</div>
+        <p>OG ট্যাগ/মেটা আছে, ফলে Facebook/X/Telegram এ শেয়ার প্রিভিউ ভালো দেখাবে।</p>
+      </div>
+    </div>
+
+    <p class="foot">⚠️ নোট: পাবলিক কাউন্টার (countapi) ডেমো উদ্দেশ্যে। প্রোডাকশনে নিজস্ব ছোট API/এজ ফাংশন ব্যবহার করুন।</p>
+  </div>
+
+<script>
+(function(){
+  const TARGET = 3; // কতজন এলে আনলক হবে
+  const NAMESPACE = 'chain-reaction-demo-v1'; // CountAPI নেমস্পেস
+  const el = (id)=>document.getElementById(id);
+  const refCountEl = el('refCount');
+  const barEl = el('bar');
+  const shareUrlEl = el('shareUrl');
+  const tick = el('tick');
+  const lockedMsg = el('lockedMsg');
+  const rewardBox = el('rewardBox');
+  const downloadLink = el('downloadLink');
+
+  // আপনার ইউনিক আইডি
+  function myId(){
+    let id = localStorage.getItem('my_ref_id');
+    if(!id){
+      id = Math.random().toString(36).slice(2,10);
+      localStorage.setItem('my_ref_id', id);
+    }
+    return id;
+  }
+
+  // শেয়ার লিংক তৈরি
+  function buildShareUrl(){
+    const url = new URL(window.location.href);
+    url.searchParams.set('ref', myId());
+    return url.toString();
+  }
+
+  // শেয়ার বাটনগুলি প্রস্তুত
+  function hydrateShareLinks(){
+    const url = encodeURIComponent(shareUrlEl.value);
+    const text = encodeURIComponent('এই ফ্রি রিসোর্স আনলক করতে আমাকে ৩ জন হেল্প করো!');
+    el('wa').href = `https://wa.me/?text=${text}%20${url}`;
+    el('tg').href = `https://t.me/share/url?url=${url}&text=${text}`;
+    el('x').href  = `https://twitter.com/intent/tweet?url=${url}&text=${text}`;
+    el('fb').href = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+  }
+
+  // কাউন্ট স্টেট
+  let currentCount = 0;
+  function updateUI(){
+    refCountEl.textContent = currentCount;
+    const pct = Math.min(100, Math.round((currentCount/TARGET)*100));
+    barEl.style.width = pct + '%';
+    tick.style.opacity = currentCount>=TARGET?1:.25;
+    if(currentCount>=TARGET){
+      lockedMsg.classList.add('hidden');
+      rewardBox.classList.remove('hidden');
+      downloadLink.href = '#'; // এখানে আপনার আসল ফাইল/কুপন দিন
+    }
+  }
+
+  // পাবলিক কাউন্টার (CountAPI)
+  async function countapi(path, method='GET'){
+    const url = `https://api.countapi.xyz/${path}`;
+    const res = await fetch(url).catch(()=>null);
+    if(!res || !res.ok) throw new Error('countapi failed');
+    return res.json();
+  }
+
+  async function ensureKey(key){
+    try{ await countapi(`create?namespace=${NAMESPACE}&key=${key}&value=0`); }
+    catch(e){ /* key may exist */ }
+  }
+
+  async function getCount(key){
+    try{ const data = await countapi(`get/${NAMESPACE}/${key}`); return data.value||0; }
+    catch(e){ return parseInt(localStorage.getItem('local_'+key)||'0',10); }
+  }
+
+  async function increment(key){
+    try{ const data = await countapi(`hit/${NAMESPACE}/${key}`); return data.value||0; }
+    catch(e){ const v = (parseInt(localStorage.getItem('local_'+key)||'0',10))+1; localStorage.setItem('local_'+key, String(v)); return v; }
+  }
+
+  // ভিজিট হলে রেফারার কাউন্টার বাড়ানো
+  async function onReferralVisit(){
+    const params = new URLSearchParams(location.search);
+    const ref = params.get('ref');
+    if(!ref) return;
+    // নিজে নিজে ক্লিক করলে ইগনোর
+    if(ref === myId()) return;
+    const stampKey = 'stamped_'+ref;
+    if(sessionStorage.getItem(stampKey)) return; // একই সেশনে একবারই
+    sessionStorage.setItem(stampKey, '1');
+    await ensureKey('ref_'+ref);
+    await increment('ref_'+ref);
+  }
+
+  // আমার কাউন্ট রিফ্রেশ
+  async function refreshMyCount(){
+    await ensureKey('ref_'+myId());
+    currentCount = await getCount('ref_'+myId());
+    updateUI();
+  }
+
+  // ইভেন্ট লিসেনার
+  el('btnCopy').addEventListener('click', async ()=>{
+    try{ await navigator.clipboard.writeText(shareUrlEl.value); alert('লিংক কপি হয়েছে!'); } catch(e){
+      shareUrlEl.select(); document.execCommand('copy'); alert('লিংক কপি হয়েছে!');
+    }
+  });
+
+  el('btnShare').addEventListener('click', async ()=>{
+    const shareData = { title:'শেয়ার করলেই আনলক', text:'এই ফ্রি রিসোর্স আনলক করতে আমাকে ৩ জন হেল্প করো!', url: shareUrlEl.value };
+    if(navigator.share){ try{ await navigator.share(shareData); } catch(e){} }
+    else{ alert('শেয়ার অপশনটি আপনার ব্রাউজারে নেই। লিংক কপি করে শেয়ার করুন।'); }
+  });
+
+  // init
+  (async function init(){
+    shareUrlEl.value = buildShareUrl();
+    hydrateShareLinks();
+    await onReferralVisit();
+    await refreshMyCount();
+    updateUI();
+  })();
+})();
+</script>
+</body>
+</html>
