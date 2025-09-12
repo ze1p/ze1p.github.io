@@ -3,307 +3,329 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Telegram Mini App (Single Page)</title>
+  <title>Telegram Mini App — Single Page</title>
   <style>
     :root{
-      --bg:#0b0f12; --card:#0f1518; --muted:#98a0a6; --accent:#6ee7b7; --danger:#ff7a7a; --glass: rgba(255,255,255,0.03);
+      --bg:#0b0f12; --panel:#0f1417; --muted:#9aa4a6; --accent:#7c5cff; --glass: rgba(255,255,255,0.03);
     }
-    *{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
-    html,body,#app{height:100%;margin:0;background:linear-gradient(180deg,#050708 0%, #071018 100%);color:#e6eef0}
-    .wrap{max-width:920px;margin:28px auto;padding:22px;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 8px 30px rgba(0,0,0,0.6)}
-    header{display:flex;align-items:center;gap:12px}
-    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#2dd4bf);display:flex;align-items:center;justify-content:center;font-weight:700;color:#022;box-shadow:0 6px 18px rgba(0,0,0,0.6)}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Noto Sans',sans-serif;background:linear-gradient(180deg,#06080a 0%,#0d1113 100%);color:#e6eef0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+    .app{width:100%;max-width:920px;background:linear-gradient(180deg,var(--panel),#0b1013);border-radius:14px;box-shadow:0 8px 30px rgba(2,6,10,0.7);overflow:hidden}
+    header{display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,0.03)}
+    .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#3bb7ff);display:flex;align-items:center;justify-content:center;font-weight:700}
     h1{font-size:18px;margin:0}
-    p.lead{margin:6px 0 18px;color:var(--muted);font-size:13px}
-
-    .card{background:var(--card);border-radius:12px;padding:18px;margin-top:12px}
-    label{display:block;font-size:13px;color:var(--muted);margin-bottom:8px}
-    input[type=text], input[type=password], input[type=email], .file-input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
-    .row{display:flex;gap:12px}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+    .container{display:grid;grid-template-columns:1fr 420px;gap:18px;padding:20px}
+    @media (max-width:900px){.container{grid-template-columns:1fr}}
+    .card{background:var(--glass);padding:18px;border-radius:12px}
+    label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
+    input[type=text],input[type=password],input[type=email],select,textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;font-size:14px}
+    .row{display:flex;gap:10px}
     .col{flex:1}
-    .small{font-size:12px;color:var(--muted)}
-    button.primary{background:linear-gradient(90deg,var(--accent),#34d399);border:0;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
-    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px 12px;border-radius:10px;color:var(--muted);cursor:pointer}
-    .center{text-align:center}
+    .prefix{display:inline-flex;align-items:center;padding:10px 12px;border-radius:8px 0 0 8px;background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.02)}
+    .input-with-prefix{display:flex}
+    button{background:var(--accent);border:none;color:#fff;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
+    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+    .muted{color:var(--muted);font-size:13px}
+    .small{font-size:12px}
+    .uploads{display:flex;flex-direction:column;gap:10px}
+    .media-item{display:flex;gap:10px;align-items:center;padding:8px;border-radius:8px;background:rgba(255,255,255,0.02)}
+    .thumb{width:72px;height:56px;border-radius:6px;background:#072;object-fit:cover}
+    .meta{flex:1}
+    .danger{color:#ff6b6b}
+    .success{color:#7be495}
+    .center{display:flex;align-items:center;justify-content:center}
     .hidden{display:none}
-    .avatar{width:64px;height:64px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:#022;background:linear-gradient(135deg,#9ae6b4,#6ee7b7);}
-    .uploads{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:12px}
-    .upload-card{background:var(--glass);padding:8px;border-radius:10px;overflow:hidden}
-    .upload-card img, .upload-card video{width:100%;height:120px;object-fit:cover;border-radius:8px;background:#0b0f12}
-    .meta{font-size:12px;color:var(--muted);margin-top:6px}
-    .note{font-size:12px;color:var(--muted);margin-top:8px}
-    .error{color:var(--danger);font-size:13px;margin-top:8px}
+    .note{padding:8px;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));font-size:13px}
   </style>
 </head>
 <body>
-  <div id="app">
-    <div class="wrap" role="application">
-      <header>
-        <div class="logo">TM</div>
-        <div>
-          <h1>Telegram Mini App — Single Page</h1>
-          <p class="lead">সব ডেটা লোকালস্টোরেজ ও কুকিতে থাকবে। প্রথমবারে সাইনআপ করুন।</p>
-        </div>
-      </header>
+  <div class="app" id="app">
+    <header>
+      <div class="logo">TG</div>
+      <div>
+        <h1>Telegram Mini App</h1>
+        <p class="lead">লোকাল স্টোরেজ-ভিত্তিক, সুন্দর ডার্ক থিম — কোনো সার্ভার সাইড ডাটাবেজ নেই</p>
+      </div>
+    </header>
 
-      <div id="signup-card" class="card">
-        <div id="signed-off" class="center">
-          <div class="avatar" id="avatar-preview">--</div>
-          <h3 id="display-name">Welcome</h3>
-          <p class="small">এখানে সাইনআপ করে ট্র্যাক আইডি তৈরি হবে এবং পরে মিডিয়া আপলোড করতে পারবেন।</p>
-        </div>
+    <div class="container">
+      <div>
+        <section class="card" id="signup-card">
+          <h3 id="signup-title">Sign up</h3>
+          <p class="muted small">প্রথমবার পেজ লোড হলে এই ফর্মটি দেখাবে।</p>
 
-        <form id="signup-form">
-          <div style="margin-top:12px" id="form-fields">
+          <div id="form-wrap">
             <label>নাম</label>
-            <input id="name" type="text" required placeholder="আপনার নাম লিখুন" />
+            <input id="name" type="text" placeholder="আপনার নাম লিখুন" />
 
             <label style="margin-top:10px">ফোন নম্বর</label>
-            <div class="row">
-              <div style="width:94px">
-                <input id="prefix" type="text" value="+88" disabled style="width:100%;text-align:center" />
-              </div>
-              <div class="col">
-                <input id="phone" type="text" placeholder="01XXXXXXXXX (11 ডিজিট)" required maxlength="11" />
-              </div>
+            <div class="input-with-prefix">
+              <div class="prefix">+88</div>
+              <input id="phone" type="text" placeholder="01XXXXXXXXX (১১ অংক)" />
             </div>
-            <div class="small">ফোন নম্বর অবশ্যই 11 ডিজিট হতে হবে এবং 01 দিয়ে শুরু করতে হবে। পূর্ণ নম্বর হবে +88 + আপনার দেয়া নম্বর।</div>
+            <div class="muted small">স্ট্যাটিক কন্ট্রিএক্ট: <strong>+88</strong> থাকবে পরিবর্তনযোগ্য নয়; প্রকৃত নম্বরটি <code>01</code> দিয়ে শুরু করে ১১ ডিজিট হতে হবে।</div>
 
-            <label style="margin-top:10px">ইমেইল (কেবল Gmail)</label>
-            <input id="email" type="email" placeholder="you@gmail.com" required />
+            <label style="margin-top:10px">ইমেইল (শুধু Gmail)</label>
+            <input id="email" type="email" placeholder="example@gmail.com" />
 
             <label style="margin-top:10px">পাসওয়ার্ড</label>
-            <input id="password" type="password" placeholder="কমপক্ষে ৬ অক্ষর" required minlength="6" />
+            <input id="password" type="password" placeholder="পাসওয়ার্ড লিখুন" />
 
-            <div style="margin-top:12px;display:flex;gap:8px">
-              <button class="primary" type="submit">সাইন আপ</button>
-              <button id="clear-btn" type="button" class="ghost">সব রিসেট</button>
+            <div style="height:10px"></div>
+            <div style="display:flex;gap:10px;align-items:center">
+              <button id="signup-btn">Sign up & Register</button>
+              <button id="clear-btn" class="ghost">Clear local data</button>
             </div>
 
-            <div id="signup-error" class="error hidden"></div>
-          </div>
-        </form>
-
-        <div id="after-submit" class="hidden">
-          <div style="display:flex;gap:12px;align-items:center;margin-top:12px">
-            <div id="avatar-ok" class="avatar"></div>
-            <div>
-              <div id="info-name" style="font-weight:700"></div>
-              <div class="small" id="info-phone"></div>
-              <div class="small" id="info-email"></div>
-              <div class="small" id="info-track"></div>
-              <div class="small" id="info-tg"></div>
-            </div>
+            <div id="signup-msg" class="muted small" style="margin-top:10px"></div>
           </div>
 
-          <div style="margin-top:14px">
-            <label>মিডিয়া আপলোড করুন</label>
-            <input id="media-input" class="file-input" type="file" accept="image/*,video/*" />
-            <div style="margin-top:8px;display:flex;gap:8px">
-              <button id="upload-btn" class="primary">আপলোড</button>
-              <button id="refresh-list" class="ghost">লিস্ট রিফ্রেশ</button>
-            </div>
-            <div id="upload-error" class="error hidden"></div>
-
-            <div class="note">আপলোড হলে মিডিয়ার সাথে ট্র্যাক আইডি ও টেলিগ্রাম ইউজার নাম পাঠানো হবে।</div>
-
-            <div id="uploads" class="uploads" aria-live="polite"></div>
+          <div id="after-signup" class="hidden">
+            <div class="note">রেজিস্ট্রেশন সফল। মিডিয়া আপলোড অথবা প্রোফাইল দেখুন।</div>
           </div>
-        </div>
+
+        </section>
+
+        <section class="card" id="media-card" style="margin-top:14px;display:none">
+          <h3>Upload Media</h3>
+          <p class="muted small">আপলোড করা ফাইলগুলো লোকালি সংরক্ষিত থাকবে এবং একই সাথে API তে পাঠানো হবে।</p>
+
+          <div style="display:flex;gap:10px;align-items:center;margin-top:10px">
+            <input id="file-input" type="file" multiple />
+            <button id="upload-btn">Upload selected</button>
+          </div>
+
+          <div style="height:8px"></div>
+          <div class="uploads" id="uploads-list"></div>
+        </section>
       </div>
 
-      <div style="margin-top:12px;text-align:center;color:var(--muted);font-size:12px">ডেটা লোকালস্টোরেজ ও কুকিতে সেভ থাকবে। কোনো সার্ভারে সেভ করা হবে না (আপনি যখন এপিআই-তে সাবমিট করবেন তখনই সার্ভারে কপি যাবে)।</div>
+      <aside>
+        <div class="card">
+          <h4>Profile</h4>
+          <div style="display:flex;gap:12px;align-items:center;margin-top:10px">
+            <canvas id="avatar-canvas" width="84" height="84" style="border-radius:12px;background:linear-gradient(135deg,var(--accent),#3bb7ff)"></canvas>
+            <div>
+              <div id="p-name">—</div>
+              <div class="muted small" id="p-phone">—</div>
+              <div class="muted small" id="p-email">—</div>
+            </div>
+          </div>
+
+          <div style="height:12px"></div>
+          <div class="note">
+            <div><strong>Track ID:</strong> <span id="p-track">—</span></div>
+            <div><strong>Telegram:</strong> <span id="p-tg">—</span></div>
+            <div style="height:8px"></div>
+            <div class="muted small">সব ডেটা আপনার ব্রাউজারের লোকাল স্টোরেজ বা কুকিতে থাকবে।</div>
+          </div>
+
+          <div style="height:12px"></div>
+          <div style="display:flex;gap:8px">
+            <button id="show-uploads">Show uploads</button>
+            <button id="logout" class="ghost">Logout (clear session)</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h4>Notes</h4>
+          <ul class="muted small">
+            <li>পেজে কোনো লিংক বা # নেই — সব বাটন JS দ্বারা কাজ করে।</li>
+            <li>APIs: <code>https://api.work.dev/singup</code> (signup) এবং <code>https://api2.work.dev/file</code> (file upload)</li>
+            <li>আপনি চাইলে প্রোফাইল ফটো পরিবর্তন করতে পারেন (অটো-জেনারেটেড ইমেজ)।</li>
+          </ul>
+        </div>
+      </aside>
     </div>
   </div>
 
-  <script>
-    // Utilities
-    function randWord(){
-      const words=["nova","terra","zephyr","lumen","astra","orbit","echo","vivid","flux","pulse"];
-      return words[Math.floor(Math.random()*words.length)];
-    }
-    function randDigits(n){let s='';for(let i=0;i<n;i++)s+=Math.floor(Math.random()*10);return s}
-    function makeTrackId(){return `${randWord()}-${randDigits(6)}`}
-    function sanitizeUsername(name){return name.trim().toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,12)+randDigits(3)}
-    function setCookie(name,val,days=365){const d=new Date();d.setTime(d.getTime()+days*24*60*60*1000);document.cookie=`${name}=${encodeURIComponent(val)};expires=${d.toUTCString()};path=/;SameSite=Lax`}
+<script>
+// Helper utilities
+const $ = id => document.getElementById(id);
+const randomInt = (min,max)=>Math.floor(Math.random()*(max-min+1))+min;
+const words = ['aurora','comet','nebula','orion','safari','falcon','echo','zenith','tango','horizon'];
 
-    // DOM
-    const signupForm=document.getElementById('signup-form');
-    const signupError=document.getElementById('signup-error');
-    const afterSubmit=document.getElementById('after-submit');
-    const mediaInput=document.getElementById('media-input');
-    const uploadBtn=document.getElementById('upload-btn');
-    const uploadsContainer=document.getElementById('uploads');
-    const infoName=document.getElementById('info-name');
-    const infoPhone=document.getElementById('info-phone');
-    const infoEmail=document.getElementById('info-email');
-    const infoTrack=document.getElementById('info-track');
-    const infoTg=document.getElementById('info-tg');
-    const avatarPreview=document.getElementById('avatar-preview');
-    const avatarOk=document.getElementById('avatar-ok');
-    const displayName=document.getElementById('display-name');
-    const clearBtn=document.getElementById('clear-btn');
-    const refreshList=document.getElementById('refresh-list');
-    const uploadError=document.getElementById('upload-error');
+function makeTrackId(name){
+  const w = words[Math.floor(Math.random()*words.length)];
+  const code = String(randomInt(0,999999)).padStart(6,'0');
+  const clean = (name||w).toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,8) || w;
+  return `${clean || w}-${code}`;
+}
 
-    function saveLocal(user){localStorage.setItem('miniapp_user', JSON.stringify(user));setCookie('miniapp_user', JSON.stringify(user));}
-    function loadLocal(){const s=localStorage.getItem('miniapp_user');return s?JSON.parse(s):null}
+function saveToLocal(user){
+  localStorage.setItem('tg_mini_user', JSON.stringify(user));
+  // also set cookie (short-lived)
+  document.cookie = `tg_mini_track=${user.trackId}; path=/; max-age=${60*60*24*30}`;
+}
 
-    function makeAvatarSVG(name, size=64){const initials=(name||'--').split(' ').map(p=>p[0]||'').slice(0,2).join('').toUpperCase();
-      const bg='#'+(Math.abs(hashCode(name||'x'))%0xFFFFFF).toString(16).padStart(6,'0');
-      const svg=`<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}'><rect rx='12' width='100%' height='100%' fill='${bg}'/><text x='50%' y='55%' font-size='26' text-anchor='middle' fill='#022' font-family='Helvetica,Arial,sans-serif' font-weight='700'>${initials}</text></svg>`;
-      return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg);
-    }
-    function hashCode(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return h}
+function loadFromLocal(){
+  try{ return JSON.parse(localStorage.getItem('tg_mini_user')) }catch(e){return null}
+}
 
-    function showUser(user){
-      avatarPreview.style.backgroundImage=`url("${user.profilePhoto}")`;
-      avatarPreview.textContent='';
-      avatarOk.style.backgroundImage=`url("${user.profilePhoto}")`;
-      avatarOk.textContent='';
-      displayName.textContent=user.name;
-      infoName.textContent=user.name;
-      infoPhone.textContent=user.phoneFull;
-      infoEmail.textContent=user.email;
-      infoTrack.textContent='Track ID: '+user.trackId;
-      infoTg.textContent='Telegram: @'+user.telegramUsername+' (id:'+user.telegramId+')';
-    }
+function clearLocal(){
+  localStorage.removeItem('tg_mini_user');
+  localStorage.removeItem('tg_mini_uploads');
+  document.cookie = 'tg_mini_track=;max-age=0;path=/';
+  location.reload();
+}
 
-    // On load: if user exists, show after-submit area
-    document.addEventListener('DOMContentLoaded', ()=>{
-      const u=loadLocal();
-      if(u){
-        document.getElementById('form-fields').classList.add('hidden');
-        afterSubmit.classList.remove('hidden');
-        showUser(u);
-        loadUploads();
-      }
+// Avatar generation (initials)
+function drawAvatar(initials){
+  const c = $('avatar-canvas');
+  const ctx = c.getContext('2d');
+  // background gradient
+  const g = ctx.createLinearGradient(0,0,c.width,c.height);
+  g.addColorStop(0,'#7c5cff'); g.addColorStop(1,'#3bb7ff');
+  ctx.fillStyle = g; ctx.fillRect(0,0,c.width,c.height);
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.font = '36px Inter, sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText((initials||'U').slice(0,2).toUpperCase(), c.width/2, c.height/2);
+  return c.toDataURL('image/png');
+}
+
+function genTelegramFields(name){
+  const uname = (name||'user').toLowerCase().replace(/[^a-z0-9_\.]/g,'').slice(0,10) + String(randomInt(10,999));
+  const accountName = name || uname;
+  const id = String(randomInt(100000000,999999999));
+  const photo = drawAvatar((name||'U').split(' ').map(s=>s[0]).join('').slice(0,2));
+  return {telegram_username: uname, account_name: accountName, telegram_id: id, profile_photo: photo};
+}
+
+// Validation
+function validateForm(name,phone,email,password){
+  if(!name.trim()) return 'নাম লিখুন';
+  if(!/^01\d{9}$/.test(phone)) return 'ফোন নম্বর সঠিক নয় — এটি 11 ডিজিট হওয়া উচিত এবং 01 দিয়ে শুরু হবে (প্রিফিক্স +88 আলাদাভাবে থাকবে)';
+  if(!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email)) return 'শুধু Gmail ইমেইল গ্রহণযোগ্য (example@gmail.com)';
+  if(password.length < 6) return 'পাসওয়ার্ড কমপক্ষে 6 অক্ষরের হতে হবে';
+  return null;
+}
+
+// UI updates
+function populateProfile(user){
+  $('p-name').textContent = user.name || '—';
+  $('p-phone').textContent = '+88' + (user.phone||'—');
+  $('p-email').textContent = user.email || '—';
+  $('p-track').textContent = user.trackId || '—';
+  $('p-tg').textContent = user.telegram_username || '—';
+  // draw avatar from stored profile photo if any
+  if(user.profile_photo){
+    const img = new Image(); img.onload = ()=>{
+      const c = $('avatar-canvas'); const ctx = c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height); ctx.drawImage(img,0,0,c.width,c.height);
+    }; img.src = user.profile_photo;
+  }
+}
+
+function showUploadsList(){
+  const listWrap = $('uploads-list'); listWrap.innerHTML='';
+  const uploads = JSON.parse(localStorage.getItem('tg_mini_uploads')||'[]');
+  if(uploads.length===0){ listWrap.innerHTML = '<div class="muted small">কোনো মিডিয়া আপলোড করা হয়নি।</div>'; return }
+  uploads.forEach((u,idx)=>{
+    const div = document.createElement('div'); div.className='media-item';
+    const img = document.createElement('img'); img.className='thumb'; img.src = u.dataUrl; div.appendChild(img);
+    const meta = document.createElement('div'); meta.className='meta';
+    meta.innerHTML = `<div><strong>${u.name}</strong></div><div class="muted small">${u.type} • ${(u.size/1024|0)} KB</div>`;
+    div.appendChild(meta);
+    const btns = document.createElement('div'); btns.style.display='flex'; btns.style.gap='8px';
+    const dl = document.createElement('button'); dl.textContent='Download'; dl.onclick = ()=>{
+      const a = document.createElement('a'); a.href = u.dataUrl; a.download = u.name; a.click();
+    };
+    const del = document.createElement('button'); del.className='ghost'; del.textContent='Remove'; del.onclick = ()=>{
+      uploads.splice(idx,1); localStorage.setItem('tg_mini_uploads', JSON.stringify(uploads)); showUploadsList();
+    };
+    btns.appendChild(dl); btns.appendChild(del); div.appendChild(btns);
+    listWrap.appendChild(div);
+  })
+}
+
+// Signup submit action
+$('signup-btn').addEventListener('click', async ()=>{
+  const name = $('name').value || '';
+  const phone = $('phone').value || '';
+  const email = $('email').value || '';
+  const password = $('password').value || '';
+  const err = validateForm(name,phone,email,password);
+  if(err){ $('signup-msg').textContent = err; return }
+  $('signup-msg').textContent = 'রেজিস্ট্রেশন প্রক্রিয়ায়...';
+
+  // create telegram-like fields locally
+  const tg = genTelegramFields(name);
+  const trackId = makeTrackId(name);
+  const user = {name, phone, email, password_placeholder: '••••••', trackId, ...tg, profile_photo: tg.profile_photo, created_at: new Date().toISOString() };
+
+  // Save locally first
+  saveToLocal(user);
+  populateProfile(user);
+
+  // Prepare payload for API
+  const payload = {
+    name: user.name,
+    phone: '+88' + user.phone,
+    email: user.email,
+    telegram_username: user.telegram_username,
+    account_name: user.account_name,
+    telegram_id: user.telegram_id,
+    profile_photo: user.profile_photo,
+    track_id: user.trackId
+  };
+
+  try{
+    const res = await fetch('https://api.work.dev/singup', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)
     });
+    if(!res.ok){ const text = await res.text(); console.warn('signup failed', text); $('signup-msg').textContent = 'API responded with error, কিন্তু লোকালি ডেটা সংরক্ষিত হয়েছে.'; }
+    else { $('signup-msg').textContent = 'সার্ভারে সফলভাবে রেজিস্টার করা হয়েছে (response OK).'; }
+  }catch(e){ console.warn(e); $('signup-msg').textContent = 'API কল ব্যর্থ (CORS/নেটওয়ার্ক) — লোকালি ডেটা সংরক্ষণ করা হয়েছে।'; }
 
-    // Signup
-    signupForm.addEventListener('submit', async (e)=>{
-      e.preventDefault();signupError.classList.add('hidden');
-      const name=document.getElementById('name').value.trim();
-      const phone=document.getElementById('phone').value.trim();
-      const email=document.getElementById('email').value.trim();
-      const password=document.getElementById('password').value;
+  // show media section
+  $('media-card').style.display = 'block';
+  $('after-signup').classList.remove('hidden');
+});
 
-      // validation
-      if(!name){showError('নাম লিখুন');return}
-      if(!/^01\d{9}$/.test(phone)){showError('ফোন নম্বর 11 ডিজিট এবং 01 দিয়ে শুরু করতে হবে (উদাহরণ: 019XXXXXXXX)');return}
-      if(!/^[^@\s]+@gmail\.com$/.test(email)){showError('শুধু Gmail ঠিকানা গ্রহণ করা হয় (example@gmail.com)');return}
-      if(password.length<6){showError('পাসওয়ার্ড অবশ্যই কমপক্ষে ৬ অক্ষর হতে হবে');return}
+// Upload flow
+$('upload-btn').addEventListener('click', async ()=>{
+  const files = $('file-input').files; if(!files || files.length===0){ alert('ফাইল সিলেক্ট করুন'); return }
+  const user = loadFromLocal(); if(!user){ alert('প্রথমে সাইন আপ করুন'); return }
 
-      // create user object
-      const trackId=makeTrackId();
-      const telegramUsername=sanitizeUsername(name);
-      const telegramId=Math.floor(100000000 + Math.random()*899999999);
-      const accountName = name;
-      const profilePhoto = makeAvatarSVG(name,96);
-      const phoneFull = '+88'+phone;
+  const uploads = JSON.parse(localStorage.getItem('tg_mini_uploads')||'[]');
+  for(const f of files){
+    // read as dataURL for local preview
+    const dataUrl = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsDataURL(f); });
+    // store locally
+    uploads.unshift({name:f.name,type:f.type,size:f.size,dataUrl,uploaded_at:new Date().toISOString()});
+    localStorage.setItem('tg_mini_uploads', JSON.stringify(uploads));
 
-      const payload={
-        name, phone:phoneFull, email, password,
-        telegram: { username:telegramUsername, id:telegramId, accountName, profilePhoto },
-        trackId
-      };
+    // send to API2
+    const fd = new FormData(); fd.append('file', f); fd.append('track_id', user.trackId); fd.append('telegram_username', user.telegram_username);
+    try{
+      const resp = await fetch('https://api2.work.dev/file', {method:'POST', body:fd});
+      if(!resp.ok){ console.warn('file upload api error', await resp.text()); }
+    }catch(e){ console.warn('file api failed', e); }
+  }
+  showUploadsList();
+});
 
-      // try submit to API
-      try{
-        const resp=await fetch('https://api.work.dev/singup',{
-          method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
-        });
-        if(!resp.ok){
-          // still save locally but show warning
-          showError('API রেসপন্স ত্রুটি: '+resp.status+' — লোকালি সেভ করা হলো।');
-        } else {
-          // optionally read response
-          const jr=await resp.json().catch(()=>null);
-          // success
-        }
-      }catch(err){
-        // network error — continue but inform
-        showError('সার্ভারে পাঠানো যায়নি (নেটওয়ার্ক ত্রুটি). ডাটা লোকালস্টোরেজে সেভ করা আছে।');
-      }
+// Clear data
+$('clear-btn').addEventListener('click', ()=>{ if(confirm('লোকাল ডেটা মুছে ফেলতে চান?')) clearLocal(); });
+$('logout').addEventListener('click', ()=>{ if(confirm('সেশন ক্লিয়ার করবেন?')) clearLocal(); });
+$('show-uploads').addEventListener('click', ()=>{ showUploadsList(); $('media-card').style.display='block'; window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}); });
 
-      // Save locally and show UI
-      const user={name, phoneFull, email, password:'(hidden)', telegramUsername, telegramId, accountName, profilePhoto, trackId};
-      saveLocal(user);
-      document.getElementById('form-fields').classList.add('hidden');
-      afterSubmit.classList.remove('hidden');
-      showUser(user);
-      loadUploads();
-    });
-
-    function showError(text){signupError.textContent=text;signupError.classList.remove('hidden');}
-
-    clearBtn.addEventListener('click', ()=>{
-      localStorage.removeItem('miniapp_user');
-      // clear uploads too
-      localStorage.removeItem('miniapp_uploads');
-      document.cookie = 'miniapp_user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      location.reload();
-    });
-
-    // Upload handling
-    uploadBtn.addEventListener('click', async ()=>{
-      uploadError.classList.add('hidden');
-      const file=mediaInput.files[0];
-      if(!file){uploadError.textContent='মিডিয়া ফাইল সিলেক্ট করুন';uploadError.classList.remove('hidden');return}
-      const user=loadLocal(); if(!user){uploadError.textContent='প্রথমে সাইনআপ করুন';uploadError.classList.remove('hidden');return}
-
-      // preview and add to local list immediately
-      const reader=new FileReader();
-      reader.onload=function(ev){
-        const dataUrl=ev.target.result;
-        addUploadLocal({name:file.name,type:file.type,size:file.size,preview:dataUrl,uploadedAt:new Date().toISOString(),trackId:user.trackId,telegram:user.telegramUsername});
-      }
-      reader.readAsDataURL(file);
-
-      // send to API2
-      try{
-        const form=new FormData();
-        form.append('file', file);
-        form.append('trackId', user.trackId);
-        form.append('telegram', user.telegramUsername);
-        const resp=await fetch('https://api2.work.dev/file', {method:'POST', body: form});
-        if(!resp.ok){uploadError.textContent='ফাইল আপলোডে সার্ভার এরর: '+resp.status;uploadError.classList.remove('hidden');}
-      }catch(err){uploadError.textContent='নেটওয়ার্ক ত্রুটি — ফাইল আপলোড হয়নি (লোকালি লিস্টে যোগ হয়েছে)';uploadError.classList.remove('hidden');}
-
-      // reset input
-      mediaInput.value='';
-      loadUploads();
-    });
-
-    function addUploadLocal(item){
-      const arr=JSON.parse(localStorage.getItem('miniapp_uploads')||'[]');
-      arr.unshift(item);
-      localStorage.setItem('miniapp_uploads', JSON.stringify(arr));
-    }
-
-    function loadUploads(){
-      uploadsContainer.innerHTML='';
-      const arr=JSON.parse(localStorage.getItem('miniapp_uploads')||'[]');
-      if(arr.length===0){uploadsContainer.innerHTML='<div class="small" style="grid-column:1/-1;color:var(--muted)">কোনো আপলোড পাওয়া যায়নি।</div>';return}
-      arr.forEach(it=>{
-        const card=document.createElement('div');card.className='upload-card';
-        if(it.type.startsWith('image/')){
-          const img=document.createElement('img');img.src=it.preview;card.appendChild(img);
-        } else if(it.type.startsWith('video/')){
-          const vid=document.createElement('video');vid.src=it.preview;vid.controls=true;card.appendChild(vid);
-        } else {
-          const box=document.createElement('div');box.textContent=it.name;card.appendChild(box);
-        }
-        const meta=document.createElement('div');meta.className='meta';meta.innerHTML=`${it.name} • ${(it.size/1024|0)} KB<br/>${new Date(it.uploadedAt).toLocaleString()}`;
-        card.appendChild(meta);
-        uploadsContainer.appendChild(card);
-      });
-    }
-
-    refreshList.addEventListener('click', loadUploads);
-
-    // Prevent anchors / url exposures: no links are used in UI
-
-  </script>
+// on load: check local storage
+window.addEventListener('DOMContentLoaded', ()=>{
+  const user = loadFromLocal();
+  if(user){
+    // populate form and profile
+    $('name').value = user.name || '';
+    // remove the +88 from stored phone when writing into input
+    $('phone').value = user.phone || '';
+    $('email').value = user.email || '';
+    $('password').value = '';
+    populateProfile(user);
+    $('media-card').style.display = 'block';
+    showUploadsList();
+    $('signup-msg').textContent = 'লোকালি সেশন লোড করা হয়েছে।';
+  }
+});
+</script>
 </body>
 </html>
