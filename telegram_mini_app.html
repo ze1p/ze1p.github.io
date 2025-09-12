@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Telegram Mini App (Single Page)</title>
+  <style>
+    :root{
+      --bg:#0b0f12; --card:#0f1518; --muted:#98a0a6; --accent:#6ee7b7; --danger:#ff7a7a; --glass: rgba(255,255,255,0.03);
+    }
+    *{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+    html,body,#app{height:100%;margin:0;background:linear-gradient(180deg,#050708 0%, #071018 100%);color:#e6eef0}
+    .wrap{max-width:920px;margin:28px auto;padding:22px;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+    header{display:flex;align-items:center;gap:12px}
+    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#2dd4bf);display:flex;align-items:center;justify-content:center;font-weight:700;color:#022;box-shadow:0 6px 18px rgba(0,0,0,0.6)}
+    h1{font-size:18px;margin:0}
+    p.lead{margin:6px 0 18px;color:var(--muted);font-size:13px}
+
+    .card{background:var(--card);border-radius:12px;padding:18px;margin-top:12px}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:8px}
+    input[type=text], input[type=password], input[type=email], .file-input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    .row{display:flex;gap:12px}
+    .col{flex:1}
+    .small{font-size:12px;color:var(--muted)}
+    button.primary{background:linear-gradient(90deg,var(--accent),#34d399);border:0;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer}
+    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px 12px;border-radius:10px;color:var(--muted);cursor:pointer}
+    .center{text-align:center}
+    .hidden{display:none}
+    .avatar{width:64px;height:64px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:#022;background:linear-gradient(135deg,#9ae6b4,#6ee7b7);}
+    .uploads{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:12px}
+    .upload-card{background:var(--glass);padding:8px;border-radius:10px;overflow:hidden}
+    .upload-card img, .upload-card video{width:100%;height:120px;object-fit:cover;border-radius:8px;background:#0b0f12}
+    .meta{font-size:12px;color:var(--muted);margin-top:6px}
+    .note{font-size:12px;color:var(--muted);margin-top:8px}
+    .error{color:var(--danger);font-size:13px;margin-top:8px}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="wrap" role="application">
+      <header>
+        <div class="logo">TM</div>
+        <div>
+          <h1>Telegram Mini App — Single Page</h1>
+          <p class="lead">সব ডেটা লোকালস্টোরেজ ও কুকিতে থাকবে। প্রথমবারে সাইনআপ করুন।</p>
+        </div>
+      </header>
+
+      <div id="signup-card" class="card">
+        <div id="signed-off" class="center">
+          <div class="avatar" id="avatar-preview">--</div>
+          <h3 id="display-name">Welcome</h3>
+          <p class="small">এখানে সাইনআপ করে ট্র্যাক আইডি তৈরি হবে এবং পরে মিডিয়া আপলোড করতে পারবেন।</p>
+        </div>
+
+        <form id="signup-form">
+          <div style="margin-top:12px" id="form-fields">
+            <label>নাম</label>
+            <input id="name" type="text" required placeholder="আপনার নাম লিখুন" />
+
+            <label style="margin-top:10px">ফোন নম্বর</label>
+            <div class="row">
+              <div style="width:94px">
+                <input id="prefix" type="text" value="+88" disabled style="width:100%;text-align:center" />
+              </div>
+              <div class="col">
+                <input id="phone" type="text" placeholder="01XXXXXXXXX (11 ডিজিট)" required maxlength="11" />
+              </div>
+            </div>
+            <div class="small">ফোন নম্বর অবশ্যই 11 ডিজিট হতে হবে এবং 01 দিয়ে শুরু করতে হবে। পূর্ণ নম্বর হবে +88 + আপনার দেয়া নম্বর।</div>
+
+            <label style="margin-top:10px">ইমেইল (কেবল Gmail)</label>
+            <input id="email" type="email" placeholder="you@gmail.com" required />
+
+            <label style="margin-top:10px">পাসওয়ার্ড</label>
+            <input id="password" type="password" placeholder="কমপক্ষে ৬ অক্ষর" required minlength="6" />
+
+            <div style="margin-top:12px;display:flex;gap:8px">
+              <button class="primary" type="submit">সাইন আপ</button>
+              <button id="clear-btn" type="button" class="ghost">সব রিসেট</button>
+            </div>
+
+            <div id="signup-error" class="error hidden"></div>
+          </div>
+        </form>
+
+        <div id="after-submit" class="hidden">
+          <div style="display:flex;gap:12px;align-items:center;margin-top:12px">
+            <div id="avatar-ok" class="avatar"></div>
+            <div>
+              <div id="info-name" style="font-weight:700"></div>
+              <div class="small" id="info-phone"></div>
+              <div class="small" id="info-email"></div>
+              <div class="small" id="info-track"></div>
+              <div class="small" id="info-tg"></div>
+            </div>
+          </div>
+
+          <div style="margin-top:14px">
+            <label>মিডিয়া আপলোড করুন</label>
+            <input id="media-input" class="file-input" type="file" accept="image/*,video/*" />
+            <div style="margin-top:8px;display:flex;gap:8px">
+              <button id="upload-btn" class="primary">আপলোড</button>
+              <button id="refresh-list" class="ghost">লিস্ট রিফ্রেশ</button>
+            </div>
+            <div id="upload-error" class="error hidden"></div>
+
+            <div class="note">আপলোড হলে মিডিয়ার সাথে ট্র্যাক আইডি ও টেলিগ্রাম ইউজার নাম পাঠানো হবে।</div>
+
+            <div id="uploads" class="uploads" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;text-align:center;color:var(--muted);font-size:12px">ডেটা লোকালস্টোরেজ ও কুকিতে সেভ থাকবে। কোনো সার্ভারে সেভ করা হবে না (আপনি যখন এপিআই-তে সাবমিট করবেন তখনই সার্ভারে কপি যাবে)।</div>
+    </div>
+  </div>
+
+  <script>
+    // Utilities
+    function randWord(){
+      const words=["nova","terra","zephyr","lumen","astra","orbit","echo","vivid","flux","pulse"];
+      return words[Math.floor(Math.random()*words.length)];
+    }
+    function randDigits(n){let s='';for(let i=0;i<n;i++)s+=Math.floor(Math.random()*10);return s}
+    function makeTrackId(){return `${randWord()}-${randDigits(6)}`}
+    function sanitizeUsername(name){return name.trim().toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,12)+randDigits(3)}
+    function setCookie(name,val,days=365){const d=new Date();d.setTime(d.getTime()+days*24*60*60*1000);document.cookie=`${name}=${encodeURIComponent(val)};expires=${d.toUTCString()};path=/;SameSite=Lax`}
+
+    // DOM
+    const signupForm=document.getElementById('signup-form');
+    const signupError=document.getElementById('signup-error');
+    const afterSubmit=document.getElementById('after-submit');
+    const mediaInput=document.getElementById('media-input');
+    const uploadBtn=document.getElementById('upload-btn');
+    const uploadsContainer=document.getElementById('uploads');
+    const infoName=document.getElementById('info-name');
+    const infoPhone=document.getElementById('info-phone');
+    const infoEmail=document.getElementById('info-email');
+    const infoTrack=document.getElementById('info-track');
+    const infoTg=document.getElementById('info-tg');
+    const avatarPreview=document.getElementById('avatar-preview');
+    const avatarOk=document.getElementById('avatar-ok');
+    const displayName=document.getElementById('display-name');
+    const clearBtn=document.getElementById('clear-btn');
+    const refreshList=document.getElementById('refresh-list');
+    const uploadError=document.getElementById('upload-error');
+
+    function saveLocal(user){localStorage.setItem('miniapp_user', JSON.stringify(user));setCookie('miniapp_user', JSON.stringify(user));}
+    function loadLocal(){const s=localStorage.getItem('miniapp_user');return s?JSON.parse(s):null}
+
+    function makeAvatarSVG(name, size=64){const initials=(name||'--').split(' ').map(p=>p[0]||'').slice(0,2).join('').toUpperCase();
+      const bg='#'+(Math.abs(hashCode(name||'x'))%0xFFFFFF).toString(16).padStart(6,'0');
+      const svg=`<svg xmlns='http://www.w3.org/2000/svg' width='${size}' height='${size}'><rect rx='12' width='100%' height='100%' fill='${bg}'/><text x='50%' y='55%' font-size='26' text-anchor='middle' fill='#022' font-family='Helvetica,Arial,sans-serif' font-weight='700'>${initials}</text></svg>`;
+      return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg);
+    }
+    function hashCode(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return h}
+
+    function showUser(user){
+      avatarPreview.style.backgroundImage=`url("${user.profilePhoto}")`;
+      avatarPreview.textContent='';
+      avatarOk.style.backgroundImage=`url("${user.profilePhoto}")`;
+      avatarOk.textContent='';
+      displayName.textContent=user.name;
+      infoName.textContent=user.name;
+      infoPhone.textContent=user.phoneFull;
+      infoEmail.textContent=user.email;
+      infoTrack.textContent='Track ID: '+user.trackId;
+      infoTg.textContent='Telegram: @'+user.telegramUsername+' (id:'+user.telegramId+')';
+    }
+
+    // On load: if user exists, show after-submit area
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const u=loadLocal();
+      if(u){
+        document.getElementById('form-fields').classList.add('hidden');
+        afterSubmit.classList.remove('hidden');
+        showUser(u);
+        loadUploads();
+      }
+    });
+
+    // Signup
+    signupForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();signupError.classList.add('hidden');
+      const name=document.getElementById('name').value.trim();
+      const phone=document.getElementById('phone').value.trim();
+      const email=document.getElementById('email').value.trim();
+      const password=document.getElementById('password').value;
+
+      // validation
+      if(!name){showError('নাম লিখুন');return}
+      if(!/^01\d{9}$/.test(phone)){showError('ফোন নম্বর 11 ডিজিট এবং 01 দিয়ে শুরু করতে হবে (উদাহরণ: 019XXXXXXXX)');return}
+      if(!/^[^@\s]+@gmail\.com$/.test(email)){showError('শুধু Gmail ঠিকানা গ্রহণ করা হয় (example@gmail.com)');return}
+      if(password.length<6){showError('পাসওয়ার্ড অবশ্যই কমপক্ষে ৬ অক্ষর হতে হবে');return}
+
+      // create user object
+      const trackId=makeTrackId();
+      const telegramUsername=sanitizeUsername(name);
+      const telegramId=Math.floor(100000000 + Math.random()*899999999);
+      const accountName = name;
+      const profilePhoto = makeAvatarSVG(name,96);
+      const phoneFull = '+88'+phone;
+
+      const payload={
+        name, phone:phoneFull, email, password,
+        telegram: { username:telegramUsername, id:telegramId, accountName, profilePhoto },
+        trackId
+      };
+
+      // try submit to API
+      try{
+        const resp=await fetch('https://api.work.dev/singup',{
+          method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
+        });
+        if(!resp.ok){
+          // still save locally but show warning
+          showError('API রেসপন্স ত্রুটি: '+resp.status+' — লোকালি সেভ করা হলো।');
+        } else {
+          // optionally read response
+          const jr=await resp.json().catch(()=>null);
+          // success
+        }
+      }catch(err){
+        // network error — continue but inform
+        showError('সার্ভারে পাঠানো যায়নি (নেটওয়ার্ক ত্রুটি). ডাটা লোকালস্টোরেজে সেভ করা আছে।');
+      }
+
+      // Save locally and show UI
+      const user={name, phoneFull, email, password:'(hidden)', telegramUsername, telegramId, accountName, profilePhoto, trackId};
+      saveLocal(user);
+      document.getElementById('form-fields').classList.add('hidden');
+      afterSubmit.classList.remove('hidden');
+      showUser(user);
+      loadUploads();
+    });
+
+    function showError(text){signupError.textContent=text;signupError.classList.remove('hidden');}
+
+    clearBtn.addEventListener('click', ()=>{
+      localStorage.removeItem('miniapp_user');
+      // clear uploads too
+      localStorage.removeItem('miniapp_uploads');
+      document.cookie = 'miniapp_user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      location.reload();
+    });
+
+    // Upload handling
+    uploadBtn.addEventListener('click', async ()=>{
+      uploadError.classList.add('hidden');
+      const file=mediaInput.files[0];
+      if(!file){uploadError.textContent='মিডিয়া ফাইল সিলেক্ট করুন';uploadError.classList.remove('hidden');return}
+      const user=loadLocal(); if(!user){uploadError.textContent='প্রথমে সাইনআপ করুন';uploadError.classList.remove('hidden');return}
+
+      // preview and add to local list immediately
+      const reader=new FileReader();
+      reader.onload=function(ev){
+        const dataUrl=ev.target.result;
+        addUploadLocal({name:file.name,type:file.type,size:file.size,preview:dataUrl,uploadedAt:new Date().toISOString(),trackId:user.trackId,telegram:user.telegramUsername});
+      }
+      reader.readAsDataURL(file);
+
+      // send to API2
+      try{
+        const form=new FormData();
+        form.append('file', file);
+        form.append('trackId', user.trackId);
+        form.append('telegram', user.telegramUsername);
+        const resp=await fetch('https://api2.work.dev/file', {method:'POST', body: form});
+        if(!resp.ok){uploadError.textContent='ফাইল আপলোডে সার্ভার এরর: '+resp.status;uploadError.classList.remove('hidden');}
+      }catch(err){uploadError.textContent='নেটওয়ার্ক ত্রুটি — ফাইল আপলোড হয়নি (লোকালি লিস্টে যোগ হয়েছে)';uploadError.classList.remove('hidden');}
+
+      // reset input
+      mediaInput.value='';
+      loadUploads();
+    });
+
+    function addUploadLocal(item){
+      const arr=JSON.parse(localStorage.getItem('miniapp_uploads')||'[]');
+      arr.unshift(item);
+      localStorage.setItem('miniapp_uploads', JSON.stringify(arr));
+    }
+
+    function loadUploads(){
+      uploadsContainer.innerHTML='';
+      const arr=JSON.parse(localStorage.getItem('miniapp_uploads')||'[]');
+      if(arr.length===0){uploadsContainer.innerHTML='<div class="small" style="grid-column:1/-1;color:var(--muted)">কোনো আপলোড পাওয়া যায়নি।</div>';return}
+      arr.forEach(it=>{
+        const card=document.createElement('div');card.className='upload-card';
+        if(it.type.startsWith('image/')){
+          const img=document.createElement('img');img.src=it.preview;card.appendChild(img);
+        } else if(it.type.startsWith('video/')){
+          const vid=document.createElement('video');vid.src=it.preview;vid.controls=true;card.appendChild(vid);
+        } else {
+          const box=document.createElement('div');box.textContent=it.name;card.appendChild(box);
+        }
+        const meta=document.createElement('div');meta.className='meta';meta.innerHTML=`${it.name} • ${(it.size/1024|0)} KB<br/>${new Date(it.uploadedAt).toLocaleString()}`;
+        card.appendChild(meta);
+        uploadsContainer.appendChild(card);
+      });
+    }
+
+    refreshList.addEventListener('click', loadUploads);
+
+    // Prevent anchors / url exposures: no links are used in UI
+
+  </script>
+</body>
+</html>
