@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>tBNB Access DApp</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+    }
+    .card {
+      background: #1e1e1e;
+      padding: 20px;
+      margin: 20px auto;
+      border-radius: 16px;
+      max-width: 400px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.6);
+    }
+    button {
+      background: #ffcc00;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+    button:hover {
+      background: #ffdb4d;
+    }
+    .balance {
+      font-size: 1.3em;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #0ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>🔗 tBNB Access</h2>
+    <p>Connect your Trust Wallet and access BNB Testnet.</p>
+
+    <button onclick="addNetwork()">➕ Add tBNB Network</button><br>
+    <button onclick="connectWallet()">🔑 Connect Wallet</button>
+
+    <div class="balance" id="balance">Balance: --</div>
+  </div>
+
+  <script>
+    const tBNBConfig = {
+      chainId: '0x61', // 97 decimal
+      chainName: 'BNB Smart Chain Testnet',
+      rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545/'],
+      nativeCurrency: {
+        name: 'tBNB',
+        symbol: 'tBNB',
+        decimals: 18
+      },
+      blockExplorerUrls: ['https://testnet.bscscan.com']
+    };
+
+    async function addNetwork() {
+      if (window.ethereum) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [tBNBConfig]
+          });
+          alert("✅ tBNB Network Added!");
+        } catch (error) {
+          alert("❌ Error adding network: " + error.message);
+        }
+      } else {
+        alert("Trust Wallet or MetaMask not detected!");
+      }
+    }
+
+    async function connectWallet() {
+      if (window.ethereum) {
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          const balance = await provider.getBalance(accounts[0]);
+          document.getElementById("balance").innerText =
+            `Balance: ${ethers.utils.formatEther(balance)} tBNB`;
+        } catch (error) {
+          alert("❌ Wallet connection failed: " + error.message);
+        }
+      } else {
+        alert("Trust Wallet or MetaMask not detected!");
+      }
+    }
+  </script>
+</body>
+</html>
