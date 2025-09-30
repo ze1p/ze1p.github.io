@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Doyel Token Creator</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+</head>
+<body style="background:#111; color:#fff; font-family:sans-serif; text-align:center; padding:30px;">
+  <h1>🚀 Doyel Token Deployer</h1>
+  <p>Token Name: <b>Doyel</b></p>
+  <p>Symbol: <b>DOYEL</b></p>
+  <p>Supply: <b>50,000,000</b></p>
+  <button id="connectBtn">🔗 Connect Wallet</button>
+  <br><br>
+  <button id="deployBtn" disabled>🚀 Deploy Token</button>
+
+  <script>
+    const contractSource = `
+    // SPDX-License-Identifier: MIT
+    pragma solidity ^0.8.0;
+
+    contract Doyel {
+        string public name = "Doyel";
+        string public symbol = "DOYEL";
+        uint8 public decimals = 18;
+        uint256 public totalSupply = 50000000 * 10 ** 18;
+
+        mapping(address => uint256) public balanceOf;
+        mapping(address => mapping(address => uint256)) public allowance;
+
+        event Transfer(address indexed from, address indexed to, uint256 value);
+        event Approval(address indexed owner, address indexed spender, uint256 value);
+
+        constructor(address admin) {
+            balanceOf[admin] = totalSupply;
+            emit Transfer(address(0), admin, totalSupply);
+        }
+
+        function transfer(address _to, uint256 _value) public returns (bool success) {
+            require(balanceOf[msg.sender] >= _value, "Not enough balance");
+            balanceOf[msg.sender] -= _value;
+            balanceOf[_to] += _value;
+            emit Transfer(msg.sender, _to, _value);
+            return true;
+        }
+
+        function approve(address _spender, uint256 _value) public returns (bool success) {
+            allowance[msg.sender][_spender] = _value;
+            emit Approval(msg.sender, _spender, _value);
+            return true;
+        }
+
+        function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
+            require(balanceOf[_from] >= _value, "Not enough balance");
+            require(allowance[_from][msg.sender] >= _value, "Allowance too low");
+            balanceOf[_from] -= _value;
+            balanceOf[_to] += _value;
+            allowance[_from][msg.sender] -= _value;
+            emit Transfer(_from, _to, _value);
+            return true;
+        }
+    }
+    `;
+
+    let web3;
+    let account;
+
+    document.getElementById("connectBtn").onclick = async () => {
+      if (window.ethereum) {
+        web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
+        let accounts = await web3.eth.getAccounts();
+        account = accounts[0];
+        alert("Wallet Connected: " + account);
+        document.getElementById("deployBtn").disabled = false;
+      } else {
+        alert("No wallet found! Use Trust Wallet or MetaMask.");
+      }
+    };
+
+    document.getElementById("deployBtn").onclick = async () => {
+      alert("⚡ Normally here we compile & deploy Solidity contract.\nFor real deployment, you need Remix or backend API.\nThis demo shows the process visually.");
+    };
+  </script>
+</body>
+</html>
