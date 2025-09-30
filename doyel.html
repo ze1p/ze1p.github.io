@@ -1,86 +1,82 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Doyel Token Creator</title>
-  <script src="https://cdn.jsdelivr.net/npm/web3@1.8.2/dist/web3.min.js"></script>
+  <meta charset="UTF-8">
+  <title>Doyel Token Deployer</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+    h1 { color: #333; }
+    textarea { width: 100%; height: 150px; margin-bottom: 10px; }
+    input, button { padding: 10px; margin-top: 10px; width: 100%; }
+    #status { margin-top: 20px; color: green; }
+  </style>
 </head>
-<body style="background:#111; color:#fff; font-family:sans-serif; text-align:center; padding:30px;">
-  <h1>🚀 Doyel Token Deployer</h1>
-  <p>Token Name: <b>Doyel</b></p>
-  <p>Symbol: <b>DOYEL</b></p>
-  <p>Supply: <b>50,000,000</b></p>
-  <button id="connectBtn">🔗 Connect Wallet</button>
-  <br><br>
-  <button id="deployBtn" disabled>🚀 Deploy Token</button>
+<body>
+  <h1>Doyel Token Deployer (tBNB/BSC)</h1>
+
+  <label for="admin">Admin Address:</label>
+  <input type="text" id="admin" placeholder="0x...">
+
+  <label for="abi">ABI (paste content of ABI.txt):</label>
+  <textarea id="abi" placeholder="ABI JSON here"></textarea>
+
+  <label for="bytecode">Bytecode (paste content of Bytecode.txt):</label>
+  <textarea id="bytecode" placeholder="0x..."></textarea>
+
+  <button id="deployBtn">Deploy Token</button>
+
+  <div id="status"></div>
 
   <script>
-    const contractSource = `
-    // SPDX-License-Identifier: MIT
-    pragma solidity ^0.8.0;
+    const status = document.getElementById('status');
+    const deployBtn = document.getElementById('deployBtn');
 
-    contract Doyel {
-        string public name = "Doyel";
-        string public symbol = "DOYEL";
-        uint8 public decimals = 18;
-        uint256 public totalSupply = 50000000 * 10 ** 18;
-
-        mapping(address => uint256) public balanceOf;
-        mapping(address => mapping(address => uint256)) public allowance;
-
-        event Transfer(address indexed from, address indexed to, uint256 value);
-        event Approval(address indexed owner, address indexed spender, uint256 value);
-
-        constructor(address admin) {
-            balanceOf[admin] = totalSupply;
-            emit Transfer(address(0), admin, totalSupply);
-        }
-
-        function transfer(address _to, uint256 _value) public returns (bool success) {
-            require(balanceOf[msg.sender] >= _value, "Not enough balance");
-            balanceOf[msg.sender] -= _value;
-            balanceOf[_to] += _value;
-            emit Transfer(msg.sender, _to, _value);
-            return true;
-        }
-
-        function approve(address _spender, uint256 _value) public returns (bool success) {
-            allowance[msg.sender][_spender] = _value;
-            emit Approval(msg.sender, _spender, _value);
-            return true;
-        }
-
-        function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {
-            require(balanceOf[_from] >= _value, "Not enough balance");
-            require(allowance[_from][msg.sender] >= _value, "Allowance too low");
-            balanceOf[_from] -= _value;
-            balanceOf[_to] += _value;
-            allowance[_from][msg.sender] -= _value;
-            emit Transfer(_from, _to, _value);
-            return true;
-        }
-    }
-    `;
-
-    let web3;
-    let account;
-
-    document.getElementById("connectBtn").onclick = async () => {
-      if (window.ethereum) {
-        web3 = new Web3(window.ethereum);
-        await window.ethereum.enable();
-        let accounts = await web3.eth.getAccounts();
-        account = accounts[0];
-        alert("Wallet Connected: " + account);
-        document.getElementById("deployBtn").disabled = false;
-      } else {
-        alert("No wallet found! Use Trust Wallet or MetaMask.");
+    deployBtn.addEventListener('click', async () => {
+      if (!window.ethereum) {
+        alert('MetaMask not detected. Install MetaMask to deploy.');
+        return;
       }
-    };
 
-    document.getElementById("deployBtn").onclick = async () => {
-      alert("⚡ Normally here we compile & deploy Solidity contract.\nFor real deployment, you need Remix or backend API.\nThis demo shows the process visually.");
-    };
+      try {
+        await ethereum.request({ method: 'eth_requestAccounts' });
+        const web3 = new Web3(window.ethereum);
+        const accounts = await web3.eth.getAccounts();
+        const deployer = accounts[0];
+
+        const adminAddress = document.getElementById('admin').value.trim();
+        if (!web3.utils.isAddress(adminAddress)) {
+          alert('Invalid admin address');
+          return;
+        }
+
+        const abiText = document.getElementById('abi').value.trim();
+        const bytecodeText = document.getElementById('bytecode').value.trim();
+
+        if (!abiText || !bytecodeText) {
+          alert('Please paste ABI and Bytecode.');
+          return;
+        }
+
+        const abi = JSON.parse(abiText);
+        const bytecode = bytecodeText.startsWith('0x') ? bytecodeText : '0x' + bytecodeText;
+
+        const contract = new web3.eth.Contract(abi);
+
+        status.innerHTML = 'Deploying contract... Please confirm MetaMask transaction.';
+
+        const deployed = await contract.deploy({ data: bytecode, arguments: [adminAddress] })
+          .send({ from: deployer, gas: 4000000 });
+
+        status.innerHTML = `
+          ✅ Contract deployed successfully! <br>
+          Address: <b>${deployed.options.address}</b>
+        `;
+      } catch (err) {
+        console.error(err);
+        status.innerHTML = '❌ Error: ' + err.message;
+      }
+    });
   </script>
 </body>
 </html>
